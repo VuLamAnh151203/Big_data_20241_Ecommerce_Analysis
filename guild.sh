@@ -20,7 +20,7 @@ chmod +x ./superset_setup/superset_setup.sh
 docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1,com.datastax.spark:spark-cassandra-connector_2.12:3.5.1 /streaming.py
 
 ### After waiting for finishing set up spark-master, comback to the git bash then run following to run kafka producer:
-docker run --network cassandra-trino-superset_pipeline-network kafka-producer
+docker run --network docker_compose_setup_pipeline-network kafka-producer
 
 ### Come the url: localhost:8090 to access the superset UI 
 

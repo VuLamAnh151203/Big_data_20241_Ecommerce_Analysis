@@ -42,7 +42,7 @@ docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark:
 - After waiting for finishing set up spark-master, comback to the `git bash` then run following to run kafka producer:
 
 ```
-docker run --network cassandra-trino-superset_pipeline-network kafka-producer
+docker run --network docker_compose_setup_pipeline-network kafka-producer
 ```
 
 - Browse the url: `localhost:8090` to access the superset UI.
