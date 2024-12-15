@@ -223,8 +223,8 @@ services:
     ports:
       - '8090:8088'
     volumes:
-      - "C:/Users/vulam/Downloads/New folder/cassandra-trino-superset/dashboard_template:/app/dashboard_template"
-      # - "./dashboard_template:/app/dashboard_template"
+      # - "C:/Users/vulam/Downloads/New folder/cassandra-trino-superset/dashboard_template:/app/dashboard_template"
+      - "./dashboard_template:/app/dashboard_template"
     environment:
       SUPERSET_SECRET_KEY: test
     networks:
