@@ -14,7 +14,7 @@ producer = KafkaProducer(
     api_version=KAFKA_API_VERSION,
 )
 # csv_file = "reddit_vm.csv"
-csv_file = "ecommerce_1000_Oct_2019.csv"
+csv_file = "batch_month10.csv"
 
 def delivery_report(err, msg):
     if err is not None:

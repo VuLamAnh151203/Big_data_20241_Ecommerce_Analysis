@@ -162,6 +162,11 @@ services:
   spark-master:
     image: bitnami/spark:latest
     container_name: spark-master
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+      - datanode3
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -169,6 +174,7 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
       - SPARK_MASTER=spark://spark-master:7077
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
     ports:
       - "7077:7077"
       - "8081:8080"
@@ -223,14 +229,119 @@ services:
     ports:
       - '8090:8088'
     volumes:
-      - "C:/Users/vulam/Downloads/New folder/cassandra-trino-superset/dashboard_template:/app/dashboard_template"
-      # - "./dashboard_template:/app/dashboard_template"
+      - "./dashboard_template:/app/dashboard_template"
     environment:
       SUPERSET_SECRET_KEY: test
     networks:
       - pipeline-network
 
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # NameNode RPC port
+    networks:
+      - pipeline-network
+    env_file:
+      - ./hadoop.env
+
+  datanode-1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode-1
+    restart: always
+    volumes:
+      - hadoop_datanode-1:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    env_file:
+      - ./hadoop.env
+
+
+  datanode-2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode-2
+    restart: always
+    volumes:
+      - hadoop_datanode-2:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+
+  datanode-3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode-3
+    restart: always
+    volumes:
+      - hadoop_datanode-3:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
+    env_file:
+      - ./hadoop.env
+
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./hadoop.env
+
+  # datanode:
+  #   image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+  #   container_name: datanode
+  #   volumes:
+  #     - hadoop_datanode:/hadoop/dfs/data
+  #   environment:
+  #     - SERVICE_PRECONDITION=namenode:9870
+  #     - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+  #   depends_on:
+  #     - namenode
+  #   ports:
+  #     - "9864:9864"  # DataNode Web UI
+  #   networks:
+  #     - pipeline-network
+  #   env_file:
+  #     - ./hadoop.env
+
 volumes:
+  hadoop_namenode:
+  hadoop_datanode-1:
+  hadoop_datanode-2:
+  hadoop_datanode-3: 
+  hadoop_historyserver:
   cassandra-data:
     driver: local
     

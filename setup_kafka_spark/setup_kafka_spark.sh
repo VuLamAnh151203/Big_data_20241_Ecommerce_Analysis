@@ -10,5 +10,5 @@ docker build -t kafka-producer .
 docker cp streaming.py spark-master:/streaming.py
 
 #Run Kafka producer container
-# docker run --network cassandra-trino-superset_pipeline-network kafka-producer
+docker run --network docker_compose_setup_pipeline-network kafka-producer
 

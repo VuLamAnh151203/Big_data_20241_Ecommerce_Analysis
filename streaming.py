@@ -23,6 +23,8 @@ CHECKPOINT_DIR_BRAND = os.getenv('CHECKPOINT_DIR_BRAND', '/tmp/checkpoint_brand2
 packages = "org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1,com.datastax.spark:spark-cassandra-connector_2.12:3.5.1"
 os.environ["PYSPARK_SUBMIT_ARGS"] = f"--packages {packages} pyspark-shell"
 
+            # .config("spark.sql.streaming.checkpointLocation", "hdfs://namenode:9000/checkpoints/kafka-to-hdfs") \
+            # .config("spark.hadoop.fs.defaultFS", "hdfs://namenode:9000") \
 def create_spark_session():
     """Create and configure Spark Session"""
     try:
@@ -45,7 +47,7 @@ def create_streaming_dataframe(spark):
         df = spark.readStream \
             .format("kafka") \
             .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS) \
-            .option("subscribePattern", "test_topic") \
+            .option("subscribe", "test_topic") \
             .option("startingOffsets", "earliest") \
             .option("failOnDataLoss", "false") \
             .load()
@@ -162,15 +164,32 @@ def main():
         .outputMode("update") \
         .option("checkpointLocation", CHECKPOINT_DIR_BRAND) \
         .start()
+    # streaming.write.csv("hdfs://namenode:9000/data/test_topic/data.csv")
+    # hdfs_query = streaming.writeStream \
+    #     .trigger(processingTime="10 seconds") \
+    #     .format("parquet") \
+    #     .outputMode("append") \
+    #     .option("path", "hdfs://namenode:9000/data/test_topic") \
+    #     .option("checkpointLocation", "hdfs://namenode:9000/checkpoints/kafka-to-hdfs") \
+    #     .start()
+
+    # hdfs_query = streaming.writeStream \
+    #     .outputMode("append") \
+    #     .format("csv") \
+    #     .option("path", "hdfs://namenode:9000/data/test_topic/data.csv") \
+    #     .option("checkpointLocation", "hdfs://namenode:9000/data/test_topic/checkpoint") \
+    #     .start()
     
     # Wait for termination with a way to handle interruption
     try:
         query_count_category.awaitTermination()
         query_count_brand.awaitTermination()
+        # hdfs_query.awaitTermination()
     except KeyboardInterrupt:
         logger.info("Streaming stopped by user")
         query_count_category.stop()
         query_count_brand.stop()
+        # hdfs_query.stop()
 
 if __name__ == "__main__":
     main()
