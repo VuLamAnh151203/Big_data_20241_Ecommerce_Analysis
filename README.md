@@ -8,7 +8,7 @@
 - Build containers and install libraries
   
 ```
-docker-compose -f ./cassandra-trino-superset/docker-compose.yml up -d
+docker-compose -f ./docker_compose_setup/docker-compose.yml up -d
 ```
 - Set up kafka and spark
 

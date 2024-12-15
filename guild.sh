@@ -1,5 +1,5 @@
 ### Run the docker compsse to set up container
-docker-compose -f ./cassandra-trino-superset/docker-compose.yml up -d
+docker-compose -f ./docker_compose_setup/docker-compose.yml up -d
 
 ### Set up kafka and spark
 chmod +x ./setup_kafka_spark/setup_kafka_spark.sh
